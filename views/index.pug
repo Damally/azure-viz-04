@@ -1,12 +1,9 @@
 extends layout
 
 block content
-  script(src="/javascripts/responder.js")
   div.main(style="width: 100%; height:100%; z-index:99; overflow:hidden;")
   div(style="position: absolute; top:0px; bottom:0px; left:0px; right:0px; background: url('icons/abstract-glowing-orange-background.jpg'); background-size: cover;  background-repeat: no-repeat;")
-
     h1#header &nbsp; Speech to Text
-    p
     div(style="width:400px; top:60px; bottom:0px; background-color:black; color:white; border:solid; opacity:0.7; position:absolute; border:2px solid #fff; margin:10px;padding:10px")
       div(style="width:400px; height:340px; margin-top:30px;vertical-align:baseline;")
         div#droparea
@@ -16,13 +13,17 @@ block content
             p#dropfiletext Drop 'wav' file here
             p or
             p
-              input#uploadbtn(class='uploadbtn' type='button' value="Select Files")
+              input#uploadbtn(class='uploadbtn' type='button' value="Select File")
             input#upload(type='file')
-      audio#audioPlayer(controls style="position:absolute; bottom:25px; width:300px;") 
-      input#playbtn(type='button' value="Translate" style="position:absolute; bottom:22px; width:90px; left:320px;")
-  
-    div(style="left:430px; right:0px; top:60px; bottom:0px; background-color:black; color:white; border:solid; opacity:0.7; position:absolute; border:2px solid #fff; margin:10px;padding:10px; overflow:auto;")
+      div#waitImage(style="position:absolute; left:30%; bottom:60px; height:60px; color:white; display:none;")
+        img(src='/icons/103.gif')  
+      div#controls(style='display:none')
+        audio#audioPlayer(controls style="position:absolute; bottom:25px; width:300px;") 
+        input#playbtn(type='button' value="Transcribe" style="position:absolute; bottom:22px; width:90px; left:320px;")
+    
+    div#transcription(style="left:430px; right:0px; top:60px; bottom:0px; background-color:black; color:white; border:solid; opacity:0.7; position:absolute; border:2px solid #fff; margin:10px;padding:10px; overflow-y:auto;")
 
   script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js")  
+  script(src="/javascripts/speech.sdk.bundle.js")
   script(src="/javascripts/main.js")
 

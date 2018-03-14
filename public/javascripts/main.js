@@ -1,3 +1,11 @@
+/**
+  *JQuery - Document Ready
+  */
+ var audioFile = null;
+ var speechTranscript = '';
+ var recognizer = null;
+ var state = 0;
+
 $(document).ready(function() {
 
     var dropzone = $('#droparea');
@@ -38,9 +46,8 @@ $(document).ready(function() {
     });
      
     defaultUploadBtn.on('change', function() {
-        //retrieve selected uploaded files data
+        var files = $(this)[0].files;
 
-        var files = $(this)[0].files;
         processFiles(files);    
         return false;
     });
@@ -48,142 +55,151 @@ $(document).ready(function() {
 	var processFiles = function(files) {
  
 		if(files && typeof FileReader !== "undefined") {
-			//process each files only if browser is supported
 			for(var iFile = 0; iFile<files.length; iFile++) {
-				readFile(files[iFile]);
+			    readFile(files[iFile]);
 			}
-		} else {
-			
-		}
+        } 
+        
     }
     
     var readFile = function(file) {
-		if( (/wav/i).test(file.type) ) {           
-			var reader = new FileReader();
-
-			//init reader onload event handlers
-			reader.onload = function(e) {	
+		if( (/wav/i).test(file.type) ) {     
+            audioFile = file;      
+           var reader = new FileReader();
+            
+			reader.onload = function(e) {
  
                 $('#audioPlayer').attr('src', reader.result);
-                                             
-			};
-			
-			//begin reader read operation
-			reader.readAsDataURL(file);
-			            
-		} else {
-            alert(file.type + " - is not supported");
-            
-			//some message for wrong file format
-			$('#err').text('*Selected file format not supported!');
-        }
-        
-    }
-
-    /**
-     * Call Microsoft's Conginitive OCR 
-     * 
-     * @param {*} file the File returned from the upload
-     * @param {*} content  the Content
-     */
-    function callCogOCR(file, content) {
-
-        try {
-        var uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/RecognizeText";
-        var subscriptionKey = "28d06e43b8a940078499d4c92217a38f";
-        
-        var params = {
-            "handwriting": "false",
-        };
-
-        var objFormData = new FormData();
-        objFormData.append('userfile', file);
-    
-        $.ajax({
-            url: uriBase + "?" + $.param(params),
-
-            // Request headers.
-            beforeSend: function(jqXHR){
-                jqXHR.setRequestHeader("Content-Type", "application/octet-stream");
-                jqXHR.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-            },
-            type: "POST",
-            processData: false,  
-            data: data2Blob(content)
-        })
-        .done(function(data) {
-
-            try {
-                var html = "";
-               for (var iRegion = 0; iRegion < data['regions'].length; iRegion++) {
-  
-                    html += processLines(data['regions'][iRegion]);
+                try { 
+                    $('#header').html('&nbsp; Speech to Text - \'' + file.name + '\'');
+                    $('#controls').css('display', 'block');
+                    $('#transcription').html('');
+                    audioFile = file;
+                } catch (e) {
 
                 }
 
-           } catch (e) {
-                alert(e);
-            }
-
-            $('#cogResult').html(html); 
-            $('#cogResult').css('overflow', 'auto');     
-            $('#cogResult').css('height', '380px');     
-            $('#cogLoader').css('display', 'none');
-            $('#CogOCRText').css('top', '-35px');
-            
-            
-        })
-
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            // Display error message.
-            var errorString = (errorThrown === "") ? "Error. " : errorThrown + " (" + jqXHR.status + "): ";
-            errorString += (jqXHR.responseText === "") ? "" : jQuery.parseJSON(jqXHR.responseText).message;
-
-            alert(errorString);
-
-        });
-
-        } catch (e) {
-            alert(e);
-        }
-
-    }
-
-    /**
-     * Convert Data to a Blob (base64 encoded)
-     * 
-     * @param {*} data to convert (base64) encoded
-     */
-    function data2Blob(data) {       
-        // convert base64 to raw binary data held in a string
-        // doesn't handle URLEncoded DataURIs
-
-        var byteString;
-
-        if (data.split(',')[0].indexOf('base64') >= 0) {
-            byteString = atob(data.split(',')[1]);
+			};
+			
+           reader.readAsDataURL(file);
+          
+          $('#controls').css('display', 'block');
+  
         } else {
-            byteString = unescape(data.split(',')[1]);
+            alert(file.type + " - is not supported");
+            
         }
-        
-        // separate out the mime component
-        var mimeString = data.split(',')[0].split(':')[1].split(';')[0]
-        
-        // write the bytes of the string to an ArrayBuffer
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-        
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        
-        //Passing an ArrayBuffer to the Blob constructor appears to be deprecated, 
-        //so convert ArrayBuffer to DataView
-        var dataView = new DataView(ab);
-        var blob = new Blob([dataView], {type: mimeString});
-     
-        return blob;
     
-    }
+     }
 
 });
+
+/**
+  * On Translate Button Button
+  */
+
+ $('#playbtn').on('click', function(e) {
+
+    if (state == 1) {
+        StopTranscription();
+        return;
+    }
+    state = 1;
+    
+    speechTranscript = '';
+    $('#transcription').html('');
+    $('#playbtn').attr('value', 'Stop');
+    $('#waitImage').css('display', 'block');
+
+    var recognizerConfig = new SDK.RecognizerConfig(
+        new SDK.SpeechConfig(      
+            new SDK.Context(    
+                new SDK.OS(navigator.userAgent, "Browser", null),    
+                new SDK.Device("SpeechSample", "SpeechSample", "1.0.00000"))),  
+                SDK.RecognitionMode.Dictation,
+                'en-US', // Supported languages are specific to each recognition mode. Refer to docs.  
+                'Detailed'); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
+
+    var authentication = function() {
+
+        return new SDK.CognitiveSubscriptionKeyAuthentication('065344a90f124d52a5a74fc889e5ca88');
+
+    }();
+
+    recognizer = SDK.CreateRecognizerWithFileAudioSource(recognizerConfig, authentication, audioFile);
+    
+    RecognizerStart(SDK, recognizer)
+
+    function RecognizerStart(SDK, recognizer) {
+            
+    recognizer.Recognize((event) => {
+            console.log(event.name);
+            switch (event.Name) {
+                case "RecognitionTriggeredEvent" :
+                    break;
+                case "ListeningStartedEvent" :
+                    break;
+                case "RecognitionStartedEvent" :
+                    break;
+                case "SpeechStartDetectedEvent" :
+                    break;
+                case "SpeechHypothesisEvent" :
+                    UpdateRecognizedHypothesis(event.Result.Text);
+                    break;
+                case "SpeechFragmentEvent" :
+                    console.log(event.Result.Text);
+                    UpdateRecognizedHypothesis(event.Result.Text);
+                    break;
+                case "SpeechEndDetectedEvent" :
+                    break;
+                case "SpeechSimplePhraseEvent" :
+                    break;
+                case "SpeechDetailedPhraseEvent" :
+                    UpdateRecognizedPhrase(event.Result);
+                    break;
+                case "RecognitionEndedEvent" :
+                    break;
+                default:
+                    console.error(JSON.stringify(event)); // Debug information
+            }
+        })
+        .On(() => {
+        },
+        (error) => {
+            alert(error);
+        });
+
+    }
+
+    function UpdateRecognizedHypothesis(text) {
+ 
+        $('#transcription').html($('#transcription').html() + "<span style='font-style:italic; color:#a0a0a0;'>" +  text + '</span>&nbsp;')
+
+    }
+
+    function UpdateRecognizedPhrase(json) {
+        console.log(JSON.stringify(json));
+
+        try { 
+            if (json['RecognitionStatus'] == 'EndOfDictation') {
+                StopTranscription();
+            } else {
+                speechTranscript += json['NBest'][json['NBest'].length-1]['Display'] +'&nbsp;'
+            }
+
+            $('#transcription').html("<span style='font-style:bold ; color:#ffffff;'>" + speechTranscript + '</spand>');
+ 
+        } catch (e) {
+            alert(e)
+        }
+        
+    }
+
+    function StopTranscription() {
+        state = 0;
+        $('#playbtn').attr('value', 'Transcribe');
+        $('#waitImage').css('display', 'none');
+        recognizer.AudioSource.TurnOff();
+    }
+ 
+ });

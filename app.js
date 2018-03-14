@@ -32,6 +32,7 @@ function logMessage(message) {
   console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + '[INFO] ' + message);
   
 }
+
 function logError(message) {
   
   console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' [ERROR] ' + message);
