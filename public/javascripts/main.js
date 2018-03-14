@@ -7,7 +7,7 @@
  var state = 0;
 
 $(document).ready(function() {
-
+    var header = $('#header').html();
     var dropzone = $('#droparea');
      
     dropzone.on('dragover', function() {
@@ -71,7 +71,7 @@ $(document).ready(function() {
  
                 $('#audioPlayer').attr('src', reader.result);
                 try { 
-                    $('#header').html('&nbsp; Speech to Text - \'' + file.name + '\'');
+                    $('#header').html(header.replace(/$.*/, '&nbsp;-&nbsp;\'' + file.name + '\''));
                     $('#controls').css('display', 'block');
                     $('#transcription').html('');
                     audioFile = file;
