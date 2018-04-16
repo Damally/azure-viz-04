@@ -122,7 +122,7 @@ $(document).ready(function() {
 
     var authentication = function() {
 
-        return new SDK.CognitiveSubscriptionKeyAuthentication('065344a90f124d52a5a74fc889e5ca88');
+        return new SDK.CognitiveSubscriptionKeyAuthentication('370ba2302d4d4a05b4219a1cc3b79408');
 
     }();
 
