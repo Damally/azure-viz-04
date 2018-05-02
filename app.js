@@ -22,6 +22,8 @@ app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use("/modules", express.static(path.join(__dirname, 'node_modules')));
+
 
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
