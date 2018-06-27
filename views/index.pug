@@ -17,6 +17,13 @@ block content
             p
               input#uploadbtn(class='uploadbtn' type='button' value="Select File")
             input#upload(type='file')
+      div#uploadWait(style="display:none;")
+        div(style="position:absolute; left:27%; top:50%")
+          div#uploadProgress(class="c100 p0 big blue")
+            span#percentage 0%
+            div.slice
+              div.bar
+              div.fill       
       div#waitImage(style="position:absolute; left:30%; bottom:60px; height:60px; color:white; display:none;")
         img(src='/icons/103.gif')  
       div#controls(style='display:none')

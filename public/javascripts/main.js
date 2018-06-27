@@ -41,7 +41,6 @@ $(document).ready(function() {
     uploadBtn.on('click', function(e) {
         e.stopPropagation();
         e.preventDefault();
-        //trigger default file upload button
         defaultUploadBtn.click();
     });
      
@@ -53,8 +52,10 @@ $(document).ready(function() {
     });
 
 	var processFiles = function(files) {
- 
-		if(files && typeof FileReader !== "undefined") {
+        $('#controls').css('display', 'none');
+        $('#transcription').html('');
+
+ 		if (files && typeof FileReader !== "undefined") {
 			for(var iFile = 0; iFile<files.length; iFile++) {
 			    readFile(files[iFile]);
 			}
@@ -63,31 +64,41 @@ $(document).ready(function() {
     }
     
     var readFile = function(file) {
-		if( (/wav/i).test(file.type) ) {     
+        if (file.size == 0) {
+            alert("File: '" + file.name + "' is empty!");
+        } else if( (/wav/i).test(file.type) ) {  
+
+            $('#uploadWait').css('display', 'block');
+
             audioFile = file;      
-           var reader = new FileReader();
+            var reader = new FileReader();
             
 			reader.onload = function(e) {
- 
+                $('#uploadWait').css('display', 'none');
                 $('#audioPlayer').attr('src', reader.result);
-                try { 
-                    $('#header').html(header.replace(/$.*/, '&nbsp;-&nbsp;\'' + file.name + '\''));
-                    $('#controls').css('display', 'block');
-                    $('#transcription').html('');
-                    audioFile = file;
-                } catch (e) {
+                $('#header').html(header.replace(/$.*/, '&nbsp;-&nbsp;\'' + file.name + '\''));
+                $('#controls').css('display', 'block');
+                $('#transcription').html('');
+                audioFile = file;
+                
+			};
+            
+            reader.onprogress = function(data) {
+                
+                if (data.lengthComputable) {                                            
+                    var progress = parseInt( ((data.loaded / data.total) * 100), 10 );
+                    document.getElementById("uploadProgress").className = "c100 p" + 
+                    progress + 
+                    " big blue";
+                    $('#percentage').html(progress + "%");
 
                 }
+            }
 
-			};
-			
-           reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
           
-          $('#controls').css('display', 'block');
-  
         } else {
             alert(file.type + " - is not supported");
-            
         }
     
      }
