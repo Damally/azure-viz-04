@@ -1005,7 +1005,7 @@
   transform: rotate(360deg);
 }
 .c100.dark {
-  background-color: #777777;
+  background-color: rgba(255,255,255,.20);
 }
 .c100.dark .bar,
 .c100.dark .fill {
