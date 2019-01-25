@@ -139,6 +139,17 @@ h1 {
 	position:absolute;
 }
 
+
+.action {
+	width:300px;
+	height:250px;
+	border:7px dashed #fff;
+	border-radius:10px;
+	vertical-align:baseline;
+	margin:0 auto;
+	text-align:center;
+}
+
 #droparea{
 	width:300px;
 	height:250px;
@@ -148,6 +159,7 @@ h1 {
 	margin:0 auto;
 	text-align:center;
 }
+
 #droparea p{
 	margin:7px 0;
 }

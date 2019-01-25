@@ -17,6 +17,6 @@
     "method-override": "^3.0.0",
     "body-parser": "^1.18.3",
     "errorhandler": "^1.5.0",
-    "microsoft-speech-browser-sdk":"^0.0.12"
-   }
+    "microsoft-speech-browser-sdk": "^0.0.12"
+  }
 }
